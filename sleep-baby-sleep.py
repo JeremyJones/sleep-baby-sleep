@@ -17,10 +17,11 @@ class Pixel:
     def __init__(self, colr=None) -> None:
         self.colr = colr
 
-        if self.colr == 'red':
-            self.red = 255
-            self.green = 0
-            self.blue = 0
+        for c in ['red', 'green', 'blue']:
+            setattr(self, c, 0)
+
+        if colr is not None:
+            setattr(self, colr, 255)
 
         self.brightness = 0.0
 
