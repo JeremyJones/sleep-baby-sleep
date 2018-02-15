@@ -4,13 +4,11 @@ A red sleep light for my baby.
 Jeremy Jones, 2018
 """
 
-from datetime import datetime
 from blinkt import clear, show, set_pixel, NUM_PIXELS
-from asyncio import get_event_loop
-from asyncio import sleep
+from asyncio import get_event_loop, sleep
 
 
-sleep_length = 3.5
+pause_length = 3.5
 loop = get_event_loop()
 
 
@@ -105,10 +103,10 @@ async def main() -> None:
         for step in range(len(b), 1, -1):
             b.set_brightness(1/(step+1))
             b.light()
-            await sleep(sleep_length)
+            await sleep(pause_length)
 
         b.clear()
-        await sleep(sleep_length)
+        await sleep(pause_length)
 
 
 if __name__ == "__main__":
