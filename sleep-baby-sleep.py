@@ -89,11 +89,13 @@ class LightBoard:
         for pixel_num, pixel in self.next():
             self.set_pixel(pixel_num, pixel.red, pixel.green, pixel.blue,
                            pixel.get_brightness() or self.default_brightness)
+            await sleep(0)
         self.show()
 
     def set_brightness(self, b) -> None:
         for num, pix in self.next():
             pix.set_brightness(b)
+            await sleep(0)
 
 
 async def main() -> None:
