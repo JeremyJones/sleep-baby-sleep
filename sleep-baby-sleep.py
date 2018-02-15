@@ -72,7 +72,7 @@ class LightBoard:
         for num, pixel in self.next():
             self.set_pixel(num, pixel.red, pixel.green, pixel.blue,
                            brightness or
-                           pixel.get_brightness() or 
+                           pixel.get_brightness() or
                            self.default_brightness)
         self.show()
 
@@ -86,7 +86,7 @@ def main() -> None:
 
     while True:
         for step in range(len(board), 1, -1):
-            board.light(1/(step+1))
+            board.light(1 / (step + 1))
             sleep(sleep_length)
 
         board.clear()
