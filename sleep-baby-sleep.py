@@ -4,7 +4,6 @@ A red sleep light for my baby.
 Jeremy Jones, 2018
 """
 
-from datetime import datetime
 from time import sleep
 from blinkt import clear, show, set_pixel, NUM_PIXELS
 
@@ -28,20 +27,6 @@ class Pixel:
     def __repr__(self) -> str:
         return "Pixel({})".format('"{}"'.format(self.colr)
                                   if self.colr else 'None')
-
-    def brighter(self) -> None:
-        self.set_brightness(
-            (self.get_brightness() * (0.1)
-             if self.get_brightness() > 0.0
-             else 0.1)
-        )
-
-    def darker(self) -> None:
-        self.set_brightness(
-            (self.get_brightness() / (0.1)
-             if self.get_brightness() > 0.1
-             else 0.0)
-        )
 
     def set_brightness(self, brightness) -> None:
         self.brightness = brightness
@@ -80,30 +65,31 @@ class LightBoard:
         )
 
     def next(self):
-        for i in range(len(self)):
-            yield i, self.pixels[i]
+        for i, p in enumerate(self.pixels):
+            yield i, p
 
-    def light(self) -> None:
-        for pixel_num, pixel in self.next():
-            self.set_pixel(pixel_num, pixel.red, pixel.green, pixel.blue,
-                           pixel.get_brightness() or self.default_brightness)
+    def light(self, brightness=None) -> None:
+        for num, pixel in self.next():
+            self.set_pixel(num, pixel.red, pixel.green, pixel.blue,
+                           brightness or
+                           pixel.get_brightness() or 
+                           self.default_brightness)
         self.show()
 
     def set_brightness(self, b) -> None:
-        for num, pix in self.next():
+        for _, pix in self.next():
             pix.set_brightness(b)
 
 
 def main() -> None:
-    b = LightBoard()
+    board = LightBoard()
 
     while True:
-        for step in range(len(b), 1, -1):
-            b.set_brightness(1/(step+1))
-            b.light()
+        for step in range(len(board), 1, -1):
+            board.light(1/(step+1))
             sleep(sleep_length)
 
-        b.clear()
+        board.clear()
         sleep(sleep_length)
 
 
