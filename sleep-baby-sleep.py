@@ -10,7 +10,7 @@ from blinkt import clear, show, set_pixel, NUM_PIXELS
 
 
 
-
+sleep_length = 3.5
 
 
 class Pixel:
@@ -89,13 +89,22 @@ class LightBoard:
                            pixel.get_brightness() or self.default_brightness)
         self.show()
 
-
+    def set_brightness(self, b) -> None:
+        for num, pix in self.next():
+            pix.set_brightness(b)
+            
+        
 def main() -> None:
     b = LightBoard()
+        
     while True:
+        for step in range(len(b), 1, -1):
+            b.set_brightness(1/(step+1))
+            b.light()
+            sleep(sleep_length)
+            
         b.clear()
-        b.light()
-        sleep(0.5)
+        sleep(sleep_length)
     
 
 
