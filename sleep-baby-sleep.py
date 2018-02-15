@@ -5,11 +5,13 @@ Jeremy Jones, 2018
 """
 
 from datetime import datetime
-from time import sleep
 from blinkt import clear, show, set_pixel, NUM_PIXELS
+from asyncio import get_event_loop
+from asyncio import sleep
 
 
 sleep_length = 3.5
+loop = get_event_loop()
 
 
 class Pixel:
@@ -93,18 +95,18 @@ class LightBoard:
             pix.set_brightness(b)
 
 
-def main() -> None:
+async def main() -> None:
     b = LightBoard()
 
     while True:
         for step in range(len(b), 1, -1):
             b.set_brightness(1/(step+1))
             b.light()
-            sleep(sleep_length)
+            await sleep(sleep_length)
 
         b.clear()
-        sleep(sleep_length)
+        await sleep(sleep_length)
 
 
 if __name__ == "__main__":
-    main()
+    loop.run_until_complete(main())
