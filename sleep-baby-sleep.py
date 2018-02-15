@@ -64,7 +64,7 @@ class LightBoard:
             pixels="\n  ".join(["{}".format(p) for i, p in self.next()])
         )
 
-    def next(self):
+    def next(self) -> tuple:
         for i, p in enumerate(self.pixels):
             yield i, p
 
