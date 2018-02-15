@@ -4,11 +4,12 @@ A red sleep light for my baby.
 Jeremy Jones, 2018
 """
 
-from time import sleep
 from blinkt import clear, show, set_pixel, NUM_PIXELS
+from asyncio import get_event_loop, sleep
 
 
-sleep_length = 3.5
+pause_length = 3.5
+loop = get_event_loop()
 
 
 class Pixel:
@@ -68,30 +69,31 @@ class LightBoard:
         for i, p in enumerate(self.pixels):
             yield i, p
 
-    def light(self, brightness=None) -> None:
-        for num, pixel in self.next():
-            self.set_pixel(num, pixel.red, pixel.green, pixel.blue,
-                           brightness or
-                           pixel.get_brightness() or
-                           self.default_brightness)
+    def light(self) -> None:
+        for pixel_num, pixel in self.next():
+            self.set_pixel(pixel_num, pixel.red, pixel.green, pixel.blue,
+                           pixel.get_brightness() or self.default_brightness)
+            await sleep(0)
         self.show()
 
     def set_brightness(self, b) -> None:
         for _, pix in self.next():
             pix.set_brightness(b)
+            await sleep(0)
 
 
-def main() -> None:
+async def main() -> None:
     board = LightBoard()
 
     while True:
         for step in range(len(board), 1, -1):
-            board.light(1 / (step + 1))
-            sleep(sleep_length)
+            board.set_brightness(1 / (step + 1))
+            board.light()
+            await sleep(pause_length)
 
         board.clear()
-        sleep(sleep_length)
+        await sleep(pause_length)
 
 
 if __name__ == "__main__":
-    main()
+    loop.run_until_complete(main())
