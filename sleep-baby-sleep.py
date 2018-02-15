@@ -59,9 +59,16 @@ class LightBoard:
     def __init__(self, num_pixels = None) -> None:
         self.num_pixels = num_pixels or self.num_pixels
         self.pixels = [Pixel(self.colr) for l in range(self.num_pixels)]
-        self.clear = clear
-        self.show = show
+        self._clear = clear
+        self._show = show
         self.set_pixel = set_pixel
+
+    def clear(self) -> None:
+        self._clear()
+        self.show()
+
+    def show(self) -> None:
+        self._show()
         
     def __len__(self) -> int:
         return self.num_pixels
