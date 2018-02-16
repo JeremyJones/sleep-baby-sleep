@@ -1,18 +1,26 @@
 """
 A red sleep light for my baby.
-
+Other colours are available.
 Jeremy Jones, 2018
 """
 
 from blinkt import clear, show, set_pixel, NUM_PIXELS
-from asyncio import get_event_loop, sleep
+import asyncio
 
 
 pause_length = 3.5
-loop = get_event_loop()
+loop = asyncio.get_event_loop()
 
 
-class Pixel:
+class Sleeper:
+    def __init__(self) -> None:
+        pass
+
+    def sleep(self, time=0) -> None:
+        await asyncio.sleep(time)
+
+
+class Pixel(Sleeper):
 
     def __init__(self, colr=None) -> None:
         self.colr = colr
@@ -36,7 +44,7 @@ class Pixel:
         return self.brightness
 
 
-class LightBoard:
+class LightBoard(Sleeper):
 
     num_pixels = NUM_PIXELS
     colr = 'red'
@@ -49,50 +57,61 @@ class LightBoard:
         self._show = show
         self.set_pixel = set_pixel
 
-    def clear(self) -> None:
-        self._clear()
-        self.show()
-
-    def show(self) -> None:
-        self._show()
+    def __repr__(self) -> str:
+        return "{header}\n  {pixels}\n".format(
+            header="Lightboard({n})".format(n=self.num_pixels),
+            pixels="\n  ".join(["{}".format(p) for i, p in self.each()])
+        )
 
     def __len__(self) -> int:
         return self.num_pixels
 
-    def __repr__(self) -> str:
-        return "{header}\n  {pixels}\n".format(
-            header="Lightboard({n})".format(n=self.num_pixels),
-            pixels="\n  ".join(["{}".format(p) for i, p in self.next()])
-        )
+    def clear(self, pause=0) -> None:
+        self._clear()
+        self.show(pause)
 
-    def next(self) -> tuple:
+    def show(self, pause=0) -> None:
+        self._show()
+        self.sleep(pause)
+
+    def each(self, pause=0) -> tuple:
         for i, p in enumerate(self.pixels):
+            self.sleep(pause)
             yield i, p
 
-    def light(self) -> None:
-        for pixel_num, pixel in self.next():
+    def all_on(self) -> None:
+        for pixel_num, pixel in self.each():
             self.set_pixel(pixel_num, pixel.red, pixel.green, pixel.blue,
                            pixel.get_brightness() or self.default_brightness)
-            await sleep(0)
-        self.show()
 
-    def set_brightness(self, b) -> None:
-        for _, pix in self.next():
+    def light(self, pause=0) -> None:
+        self.all_on()
+        self.show(pause)
+
+    def light_up(self, level=None) -> None:
+        self.set_brightness(level)
+        self.light()
+
+    def _set_brightness(self, b) -> None:
+        for _, pix in self.each():
             pix.set_brightness(b)
-            await sleep(0)
+
+    def set_brightness(self, level=None) -> None:
+        brightness = 1 - ((len(self) -
+                          (level or 0)) / 10)  # between 0 and 1
+        self._set_brightness(brightness)
+
+    def reset(self, pause=0) -> bool:
+        self.clear(pause)
+        return True
 
 
 async def main() -> None:
     board = LightBoard()
 
-    while True:
-        for step in range(len(board), 1, -1):
-            board.set_brightness(1 / (step + 1))
-            board.light()
-            await sleep(pause_length)
-
-        board.clear()
-        await sleep(pause_length)
+    while board.reset(pause_length):
+        for brightness_level, _ in board.each(pause_length):
+            board.light_up(brightness_level)
 
 
 if __name__ == "__main__":
